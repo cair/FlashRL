@@ -3,12 +3,10 @@ from io import BytesIO
 import time
 import numpy as np
 import psutil
-import pywinauto
 from PIL import Image
-from pywinauto import Application
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-
 from rl.Main import DQN
 from state.multitask_one.model import StateModel
 import os
@@ -35,6 +33,7 @@ def holdKeyW(driver, key, duration):
 
         key["autoRepeat"] = True
         time.sleep(0.01)
+
 
 class Multitask:
 
@@ -66,23 +65,34 @@ class Multitask:
                 "windowsVirtualKeyCode": 39
             }]
 
-
-        self.q_model = DQN((150, 150, 3), self.action_space)
+        self.q_model = DQN((84, 84, 3), self.action_space)
         self.area = self.get_screen_area()
-        self.element = self.driver.find_element_by_tag_name('embed')
+        self.element = self.driver.find_element_by_tag_name('input')
+        self.element2 = self.driver.find_element_by_tag_name('embed')
+        self.rect = self.element.rect
+        self.points = [self.rect['x'], self.rect['y'], self.rect['x'] + self.rect['width'], self.rect['y'] + self.rect['height']]
         self.image_save_path = os.path.join(dir_path, "..", "state", "multitask_one", "images")
-
-        chrome_window_app = Application()
-        chrome_window_app.connect(process=self.get_pid())  # connect to browser
 
         has_trained = False
         is_clean = True
+        has_pressed_menu = False
+        has_pressed_score = False
         state_pairs = []
 
+        self.element.send_keys("q")
+
         while True:
+            self.element2.send_keys("q")
+            self.element.send_keys("q")
+
+            self.element2.send_keys("m")
+            self.element.send_keys("m")
+
+            time.sleep(1)
             raw_img = self.render()
             s = self.model.preprocess(raw_img)
             predicted = self.model.predict(s)
+            print(predicted)
 
             if predicted == "menu":
                 if not has_trained:
@@ -97,12 +107,22 @@ class Multitask:
 
                     has_trained = True
 
-                pywinauto.mouse.click(button='left', coords=(300, 700))
-            elif predicted == "stage_1_prompt":
+
+                has_pressed_score = False
+                if not has_pressed_menu:
+                    self.element.send_keys("q")
+                    has_pressed_menu = True
+
+            """elif predicted == "stage_1_prompt" or predicted == "stage_4_prompt" or predicted == "stage_3_prompt" or predicted == "stage_2_prompt":
                 self.element.send_keys(Keys.ENTER)
+                print(self.element)
             elif predicted == "score":
-                pywinauto.mouse.click(button='left', coords=(300, 800))
-                pywinauto.mouse.click(button='left', coords=(350, 800))
+
+                has_pressed_menu =  False
+                if not has_pressed_score:
+                    self.element.send_keys("q")
+                    has_pressed_score = True
+
             elif predicted == "terminal":
                 if not is_clean:
                     state_pairs[len(state_pairs) - 1][2] = -1
@@ -135,7 +155,7 @@ class Multitask:
 
                 #print(predicted)
                 #raw_img.save(os.path.join(self.image_save_path, "state_%s_%s.png" % (predicted, int(time.time()))))
-
+            """
     def get_screen_area(self):
         element = self.driver.find_element_by_tag_name('embed')
         location = element.location
@@ -145,5 +165,5 @@ class Multitask:
     def render(self):
         img = self.driver.get_screenshot_as_png()
         img = Image.open(BytesIO(img))
-        img = img.crop(self.area)
+        img = img.crop(self.points)
         return img

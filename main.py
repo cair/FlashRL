@@ -1,15 +1,19 @@
 import threading
 
 from handler import Handler
-from server import app
 import sys
 
+from server import serve
 
 if __name__ == "__main__":
-    #t1 = threading.Thread(target=app.run)
-    #t1.start()
-
-    sys.setrecursionlimit(999999999)
-    h = Handler()
+    print("Starting Webserver")
+    web_thread = threading.Thread(target=serve)
+    web_thread.daemon = False
+    web_thread.start()
+    try:
+        h = Handler()
+    except Exception as e:
+        print(e)
+    web_thread.join()
 
 

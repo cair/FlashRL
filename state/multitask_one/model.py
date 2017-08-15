@@ -5,7 +5,7 @@ from tensorflow.contrib.keras.python.keras.layers import Conv2D, Activation, Max
 from tensorflow.contrib.keras.python.keras.models import Sequential, load_model
 import os
 
-from tensorflow.contrib.keras.python.keras.optimizers import RMSprop
+from tensorflow.contrib.keras.python.keras.optimizers import RMSprop, Adam
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -21,7 +21,7 @@ class StateModel:
     def build_model(self):
 
         model = Sequential()
-        model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 3)))
+        model.add(Conv2D(32, (3, 3), input_shape=(84, 84, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -29,22 +29,23 @@ class StateModel:
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(32, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Conv2D(32, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
+
+
+
 
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
         model.add(Dense(128))
         model.add(Activation('relu'))
-        model.add(Dropout(0.3))
+        model.add(Dropout(0.5))
+
         model.add(Dense(len(self.classes)))
         model.add(Activation('relu'))
 
-        optimizer = RMSprop(lr=0.00001, decay=8e-08)
+        optimizer = Adam(lr=0.00001, decay=8e-08)
         model.compile(loss='categorical_crossentropy',
                       optimizer=optimizer,
                       metrics=['accuracy'])
@@ -52,7 +53,7 @@ class StateModel:
         return model
 
     def preprocess(self, pil_image):
-        img = pil_image.resize((150, 150), ANTIALIAS)
+        img = pil_image.resize((84, 84), ANTIALIAS)
         img = img.convert('RGB')
         return np.array(img)
 
