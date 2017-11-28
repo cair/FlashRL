@@ -1,28 +1,40 @@
 import os
+import threading
+import time
+from easyprocess import EasyProcess
+from pyVNC.Client import Client
+from pyvirtualdisplay import Display
 
-from selenium import webdriver
-from selenium.webdriver.opera.options import Options
-from selenium.webdriver.opera.options import DesiredCapabilities
-from selenium.webdriver.
-
-from settings import settings
 from state_machine.Multitask import Multitask
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
+
+def vnc(vnc_display):
+    os.environ["DISPLAY"] = vnc_display
+    with Display(backend='xvnc', rfbport=5902, size=(223, 150)) as disp:
+        with EasyProcess(' '.join(['gnash', os.path.join(dir_path, "environments", "multitaskgame.swf"), "--width", "150", "--height", "150"])) as proc:
+            proc.wait()
 
 
 class Handler:
     def __init__(self):
-        # sudo pip3 install selenium==3.3.3
-        # sudo apt-get install firefox=50.1.0+build2-0ubuntu1
-        # geckodriver 16.1
-        print("Initialize PhantomJS")
+        original_display = os.environ["DISPLAY"]
+        vnc_display = ":98"
+        print("Initialize xVNC")
+        print("---------------")
+        print("Display: %s" % original_display)
+        print("VNC Display: %s" % vnc_display)
+        x_vnc = threading.Thread(target=vnc, args=(vnc_display, ))
+        x_vnc.start()
 
-        self.driver = webdriver.Chrome()
-        self.driver.get("http://localhost:8082/environments/multitaskgame.html")
+        time.sleep(1)
 
-        #self.driver.get(settings["multitask_1-v0"]["url"])
+        os.environ["DISPLAY"] = original_display
+        py_vnc = Client(host="127.0.0.1", port=5902, gui=False, array=True)
+        py_vnc.start()
 
-        Multitask(self.driver)
+        time.sleep(1)
 
-    def exit(self):
-        self.driver.close()
+        Multitask(py_vnc)
+

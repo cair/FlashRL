@@ -1,169 +1,144 @@
-import json
-from io import BytesIO
-import time
+import threading
 import numpy as np
-import psutil
+import time
+
+import pygame
+from pyVNC.constants import K_LEFT, K_RIGHT
 from PIL import Image
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.keys import Keys
 from rl.Main import DQN
 from state.multitask_one.model import StateModel
 import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def dispatchKeyEvent(driver, name, options = {}):
-    options["type"] = name
-    body = json.dumps({'cmd': 'Input.dispatchKeyEvent', 'params': options})
-    resource = "/session/%s/chromium/send_command" % driver.session_id
-    url = driver.command_executor._url + resource
-    driver.command_executor._request('POST', url, body)
-
-def holdKeyW(driver, key, duration):
-    endtime = time.time() + duration
-
-    while True:
-        dispatchKeyEvent(driver, "rawKeyDown", key)
-        dispatchKeyEvent(driver, "char", key)
-
-        if time.time() > endtime:
-            dispatchKeyEvent(driver, "keyUp", key)
-            break
-
-        key["autoRepeat"] = True
-        time.sleep(0.01)
-
 
 class Multitask:
 
-    def get_pid(self):
-        if isinstance(self.driver, webdriver.Chrome):
-            process = psutil.Process(self.driver.service.process.pid)
-            return process.children()[0].pid              # process id of browser tab
-        if isinstance(self.driver, webdriver.Firefox):
-            return self.driver.service.process.pid       # process id of browser
+    def state_debugger(self, s, s1, r):
+        du = np.sum((s - s1)**2)
+        label = self.pygame_font.render(str(r), 1, (255, 0, 0))
+        label2 = self.pygame_font.render(str(du), 1, (255, 0, 0))
+        label_surface = pygame.Surface((84, 84))
+        label_surface.blit(label, (0, 0))
+        label_surface.blit(label2, (0, 48))
 
-    def __init__(self, driver):
-        self.driver = driver
+        score = pygame.surfarray.array3d(label_surface).swapaxes(0, 1)
+        concat_it = np.concatenate((s, score, s1), axis=1)
+
+        im = Image.fromarray(concat_it.astype('uint8'))
+        im.save("test.png")
+
+
+    def create_training_data(self, clazz, s):
+        pass
+
+
+    def handle_menu(self):
+
+        if not self.has_trained:
+            print(self.episode_reward, self.action_distribution, self.q_model.memory.count)
+            self.episode_reward = 0
+            self.action_distribution = [0 for x in self.action_space]
+
+            # Train for 10 epochs
+            for i in range(100):
+                self.q_model.train()
+
+            # Set trained flag to true
+            self.has_trained = True
+
+        if not self.has_pressed_menu:
+            self.py_vnc.send_key("q")
+            self.stage_time_dy = None
+            self.has_pressed_menu = True
+
+    def on_frame(self):
+        pass
+
+    def __init__(self, py_vnc):
+        self.py_vnc = py_vnc
+        self.py_vnc.send_mouse("Left", (self.py_vnc.screen.size[0], 0))
+        self.py_vnc.add_callback(1 / 10, self.on_frame) # 10 FPS
         self.model = StateModel(True)
-        self.action_space = [Keys.LEFT, Keys.RIGHT]
-        self.action_space_chrome = [{
-            "code": "KeyLeft",
-            "key": "left",
-            "text": "left",
-            "unmodifiedText": "left",
-            "nativeVirtualKeyCode": 37,
-            "windowsVirtualKeyCode": 37
-        },
-            {
-                "code": "KeyRight",
-                "key": "left",
-                "text": "left",
-                "unmodifiedText": "left",
-                "nativeVirtualKeyCode": 39,
-                "windowsVirtualKeyCode": 39
-            }]
-
+        self.action_space = [K_LEFT, K_RIGHT, None]
         self.q_model = DQN((84, 84, 3), self.action_space)
-        self.area = self.get_screen_area()
-        self.element = self.driver.find_element_by_tag_name('input')
-        self.element2 = self.driver.find_element_by_tag_name('embed')
-        self.rect = self.element.rect
-        self.points = [self.rect['x'], self.rect['y'], self.rect['x'] + self.rect['width'], self.rect['y'] + self.rect['height']]
-        self.image_save_path = os.path.join(dir_path, "..", "state", "multitask_one", "images")
 
-        has_trained = False
-        is_clean = True
-        has_pressed_menu = False
-        has_pressed_score = False
-        state_pairs = []
+        self.EPSILON_DECAY = (self.q_model.EPSILON_END - self.q_model.EPSILON_START) / 10000
+        self.image_save_path = os.path.join(dir_path, "..", "state", "unlabeled")
 
-        self.element.send_keys("q")
+        self.has_trained = False
+        self.is_clean = True
+        self.has_pressed_menu = False
+        self.has_pressed_score = False
+        self.been_terminal = False
+
+        self.stage_time_counter = 0
+        self.stage_time_dy = None
+        self.stage_time_max = 120
+
+        self.action_distribution = None
+        self.episode_reward = 0
+
+        # DEbugging stuff
+        self.pygame_font = pygame.font.SysFont("monospace", 18)
 
         while True:
-            self.element2.send_keys("q")
-            self.element.send_keys("q")
-
-            self.element2.send_keys("m")
-            self.element.send_keys("m")
-
-            time.sleep(1)
             raw_img = self.render()
             s = self.model.preprocess(raw_img)
+
             predicted = self.model.predict(s)
             print(predicted)
 
             if predicted == "menu":
-                if not has_trained:
-                    # Train xD
-                    # Add to exp replay
-                    for pair in state_pairs:
-                        self.q_model.memory.add(pair)
-                    state_pairs = []
+                self.been_terminal = False
+                self.handle_menu()
 
-                    for i in range(10):
-                        self.q_model.train()
+            elif predicted == "prompt":
+                self.py_vnc.send_key("x")
 
-                    has_trained = True
+            elif predicted in ["terminal_1", "terminal_2"]:
+                self.been_terminal = True
+                if not self.is_clean:
+                    self.q_model.memory.buffer[self.q_model.memory.count - 1][2] = -1
+                    #print("setting last in pair to negative")
+                    time.sleep(3)
+                    self.py_vnc.send_key("q")
 
+                    self.is_clean = True
+                    self.has_pressed_menu = False
 
-                has_pressed_score = False
-                if not has_pressed_menu:
-                    self.element.send_keys("q")
-                    has_pressed_menu = True
+            elif predicted == "stage":
+                if not self.been_terminal:
+                    self.is_clean = False
+                    self.has_trained = False
+                    # 0. Observe (s)
+                    # 1. Do action
+                    # 2. Observe
+                    # 3. Train
+                    # 4. set state+1 to state
 
-            """elif predicted == "stage_1_prompt" or predicted == "stage_4_prompt" or predicted == "stage_3_prompt" or predicted == "stage_2_prompt":
-                self.element.send_keys(Keys.ENTER)
-                print(self.element)
-            elif predicted == "score":
+                    a_idx = self.q_model.act(np.array([s]))
+                    a = self.action_space[a_idx]
+                    self.action_distribution[a_idx] += 1
+                    if a is not None:
+                        self.py_vnc.send_key(a, duration=.1)
 
-                has_pressed_menu =  False
-                if not has_pressed_score:
-                    self.element.send_keys("q")
-                    has_pressed_score = True
+                    time.sleep(.5)
 
-            elif predicted == "terminal":
-                if not is_clean:
-                    state_pairs[len(state_pairs) - 1][2] = -1
-                    print("setting last in pair to negative")
-                    is_clean = True
+                    raw_img = self.render()
+                    s1 = self.model.preprocess(raw_img)
+                    r = 0.01
+                    self.episode_reward += r
 
-            elif predicted == "stage_1":
-                is_clean = False
-                has_trained = False
-                # 0. Observe (s)
-                # 1. Do action
-                # 2. Observe
-                # 3. Train
-                # 4. set state+1 to state
-                a_idx = self.q_model.act(np.array([s]))
-                a = self.action_space[a_idx]
-
-                print(a)
-                holdKeyW(self.driver, self.action_space_chrome[a_idx], .05)
+                    self.q_model.memory.add([s, a_idx, r, s1, False])
 
 
-                raw_img = self.render()
-                s1 = self.model.preprocess(raw_img)
-                r = 0.01
+                    #Debug stuff
+                    self.state_debugger(s, s1, r)
 
-                state_pairs.append([s, a_idx, r, s1, False])
-
-
-
-
-                #print(predicted)
-                #raw_img.save(os.path.join(self.image_save_path, "state_%s_%s.png" % (predicted, int(time.time()))))
-            """
-    def get_screen_area(self):
-        element = self.driver.find_element_by_tag_name('embed')
-        location = element.location
-        size = element.size
-        return location["x"], location["y"], size["height"], size["width"]
+            time.sleep(.1)
 
     def render(self):
-        img = self.driver.get_screenshot_as_png()
-        img = Image.open(BytesIO(img))
-        img = img.crop(self.points)
+        img = self.py_vnc.screen.get_array()
+        img = Image.fromarray(img)
         return img

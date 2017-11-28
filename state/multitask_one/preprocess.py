@@ -6,10 +6,11 @@ import os
 if __name__ == "__main__":
     model = StateModel()
 
-    image_class_path = os.path.join(os.getcwd(), "images")
+    image_class_path = os.path.join(os.getcwd(), "images", "training")
     image_classes = [x for x in os.listdir(image_class_path)]
     image_classes_path = [os.path.join(image_class_path, x) for x in image_classes]
     n_classes = len(image_classes)
+    print(n_classes)
     X = []
     Y = []
     for i, class_path in enumerate(image_classes_path):
