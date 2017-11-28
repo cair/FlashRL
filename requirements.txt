@@ -1,1 +1,8 @@
 selenium
+easyprocess
+git+https://github.com/UIA-CAIR/pyVNC
+pyvirtualdisplay
+tensorflow
+tensorflow-gpu
+h5py
+keras

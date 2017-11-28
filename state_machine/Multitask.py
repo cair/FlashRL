@@ -107,7 +107,7 @@ class Multitask:
                     self.is_clean = True
                     self.has_pressed_menu = False
 
-            elif predicted == "stage":
+            elif predicted == "stage" or True:
                 if not self.been_terminal:
                     self.is_clean = False
                     self.has_trained = False

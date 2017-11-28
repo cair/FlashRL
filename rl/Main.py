@@ -2,13 +2,13 @@ import os
 import time
 import random
 import numpy as np
-from tensorflow.contrib.keras.python.keras import backend as K
-from tensorflow.contrib.keras.python.keras.models import load_model
-from tensorflow.contrib.keras.python.keras.optimizers import RMSprop
-from tensorflow.contrib.keras.python.keras.engine import Input, Model
-from tensorflow.contrib.keras.python.keras.utils.vis_utils import plot_model
-from tensorflow.contrib.keras.python.keras.layers.convolutional import Conv2D
-from tensorflow.contrib.keras.python.keras.layers.core import Flatten, Dense, Lambda, Reshape
+from keras import backend as K
+from keras.models import load_model
+from keras.optimizers import RMSprop
+from keras.engine import Input, Model
+from keras.utils.vis_utils import plot_model
+from keras.layers.convolutional import Conv2D
+from keras.layers.core import Flatten, Dense, Lambda, Reshape
 
 from rl.Memory import Memory
 from rl.settings import settings

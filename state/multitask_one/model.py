@@ -2,12 +2,12 @@ import random
 
 import numpy as np
 from PIL.Image import ANTIALIAS
-from tensorflow.contrib.keras.python.keras.callbacks import ModelCheckpoint
-from tensorflow.contrib.keras.python.keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
-from tensorflow.contrib.keras.python.keras.models import Sequential, load_model
+from keras.callbacks import ModelCheckpoint
+from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
+from keras.models import Sequential, load_model
 import os
 
-from tensorflow.contrib.keras.python.keras.optimizers import RMSprop, Adam
+from keras.optimizers import RMSprop, Adam
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
