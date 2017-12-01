@@ -39,6 +39,8 @@ class Environment:
         img = img.convert('RGB')
         return np.array(img)
 
+        # NN-Tr XD lets go
+
     def render(self):
         img = self.vnc.screen.get_array()
         img = Image.fromarray(img)
