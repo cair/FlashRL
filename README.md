@@ -1,9 +1,80 @@
 # FlashRL - Flash Platform for Reinforcement Learning
 Flash Reinforcement Learning (or FlashRL) is a framework for developing RL algorithms for flash games. It features several thousand game environments, some of which are ready to use without any modification.
 
-# Basic Usage
+# TODO List
+* Tidy up documentation
+* State autolabeling (Feb?)
+* FPS Control
+* Docker Support
+
+
+# Prerequisites
+* Linux based operating system (Ubuntu 17.04 and 17.10 are tested)
+* Python 3.x.x (3.5 and 3.6 are tested)
+
+# Installation
+
 ```python
+sudo pip3 install git+https://github.com/UIA-CAIR/FlashRL
 ```
+
+# Deploy new environment
+Setting up a new environment is a relatively simple process. We allow developers to import custom environments through ```project/contrib/environments/```
+
+A typical custom implementation looks like this:
+```python
+- project
+    - __init__.py
+    - main.py
+    - contrib
+        - environments
+            - env_name
+                - __init__.py
+                - dataset.p
+                - model.h5
+                - env.swf
+
+```
+in the following section, we demonstrate how to implement the flash game Mujaffa as an environment for FlashRL.
+
+## Mujaffa-1.6
+### Prerequisites
+* SWF Game File
+* Python 3x
+* Keras
+
+### 
+*  Create directory structure ```mkdir -p contrib/environments/mujaffa-v1.6```
+*  Create Configuration file:  
+```python 
+echo "define = {
+    "swf": "mujaffa.swf",
+    "model": "model.h5",
+    "dataset": "dataset.p",
+    "scenes": [],
+    "state_space": (84, 84, 3)
+}" > contrib/environments/mujaffa-v1.6/__init__.py
+```
+
+* Add swf "mujaffa.swf" to ```contrib/environments/mujaffa-v1.6/```
+* Create file ```main.py in project root``` with following template
+```
+from FlashRL import Game
+
+def on_frame(state, type, vnc):
+    # vnc.send_key("a") # Sends the key "a"
+    # vnc.send_mouse("Left", (200, 200)) # Left Clicks at x=200, y=200
+    # vnc.send_mouse("Right", (200, 200)) # Right Clicks at x=200, y=200
+    pass
+
+g = Game("mujaffa-v1.6", fps=10, frame_callback=on_frame, grayscale=True, normalized=True)
+```
+
+The game will now run without issues and you can control the game via VNC. The game states are however not identified and must be done manually in the on_frame loop (for now)
+
+### Todos
+Document state recognition module
+
 
 
 # Tested envrionments
