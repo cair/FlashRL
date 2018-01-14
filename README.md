@@ -1,6 +1,18 @@
 # FlashRL - Flash Platform for Reinforcement Learning
 Flash Reinforcement Learning (or FlashRL) is a framework for developing RL algorithms for flash games. It features several thousand game environments, some of which are ready to use without any modification.
 
+If you use this work in your research, please cite the following paper :)
+```
+@article{NIK,
+	author = {Per-Arne Andersen and Morten Goodwin and Ole-Christoffer Granmo},
+	title = { FlashRL: A Reinforcement Learning Platform for Flash Games},
+	journal = {Norsk Informatikkonferanse},
+	year = {2017},
+	keywords = {},
+	issn = {1892-0721},	url = {https://ojs.bibsys.no/index.php/NIK/article/view/437}
+}
+```
+
 # TODO List
 * Tidy up documentation
 * State autolabeling (Feb?)
