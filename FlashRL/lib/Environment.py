@@ -8,6 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class Environment:
     def __init__(self, env_name, fps=10, frame_callback=None, grayscale=False, normalized=False):
         self.fps = fps
+        self.frame_count = 0
         self.grayscale = grayscale
         self.normalized = normalized
         self.frame_callback = frame_callback
@@ -85,4 +86,6 @@ class Environment:
             state_type = self.action_names[np.argmax(self.model.predict(state))]
 
         if self.frame_callback:
-            self.frame_callback(state, state_type, self.vnc)
+            self.frame_callback(state, self.frame_count, state_type, self.vnc)
+
+        self.frame_count += 1
