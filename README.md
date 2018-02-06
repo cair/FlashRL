@@ -1,4 +1,6 @@
 # FlashRL - Flash Platform for Reinforcement Learning
+**Note that FlashRL is under heavy development. Breaking changes may occur**
+
 Flash Reinforcement Learning (or FlashRL) is a framework for developing RL algorithms for flash games. It features several thousand game environments, some of which are ready to use without any modification.
 
 If you use this work in your research, please cite the following paper :)
@@ -14,7 +16,6 @@ If you use this work in your research, please cite the following paper :)
 ```
 
 # TODO List
-* Tidy up documentation
 * State autolabeling (Feb?)
 * FPS Control
 * Docker Support
@@ -23,11 +24,13 @@ If you use this work in your research, please cite the following paper :)
 # Prerequisites
 * Linux based operating system (Ubuntu 17.04 and 17.10 are tested)
 * Python 3.x.x (3.5 and 3.6 are tested)
+* gnash
+* xvfb
 
 # Installation
 
 ```python
-sudo pip3 install git+https://github.com/UIA-CAIR/FlashRL
+pip install git+https://github.com/UIA-CAIR/FlashRL
 ```
 
 # Deploy new environment
