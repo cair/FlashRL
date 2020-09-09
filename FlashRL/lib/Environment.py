@@ -31,6 +31,8 @@ class Environment:
 
         try:
             #self.model = load_model(self.model_path)
+            print("Self.model initialize would occur here")
+            self.model = None
         except OSError as e:
             print("No state prediction!")
             self.model = None
