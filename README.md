@@ -1,5 +1,6 @@
 # FlashRL - Flash Platform for Reinforcement Learning
 **Note that FlashRL is under heavy development. Breaking changes may occur**
+**Note: This version of FlashRL has been forked to experiment with non-Keras ML frameworks**
 
 Flash Reinforcement Learning (or FlashRL) is a framework for developing RL algorithms for flash games. It features several thousand game environments, some of which are ready to use without any modification.
 
