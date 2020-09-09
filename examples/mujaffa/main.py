@@ -1,4 +1,4 @@
-from FlashRL import Game
+from FlashRL.lib.Game import Game
 
 
 def on_frame(state, frame, type, vnc):
