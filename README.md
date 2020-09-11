@@ -14,14 +14,17 @@ Our goal is to use FlashRL to run our own Flash games and train reinforcement le
 * Begin developing Docker containers for our code to run in. Preferably, create a Dockerfile that can be used to run custom environments without the need for the local machine to have all the dependencies installed.
 
 # Prerequisites
-* Linux based operating system (Ubuntu 17.04 and 17.10 are tested)
-* Python 3.x.x (3.5 and 3.6 are tested)
+* Linux based operating system (Ubuntu 18.04 is tested)
+* Python 3.x.x (Python 3.6.8 is tested)
 * gnash
 * xvfb
 
 # Installation
 For our testing, we have been working in a python virtual environment.
-```python
+```bash
+sudo apt-get install gnash
+sudo apt-get install vnc4server
+# I would reccomend doing the next steps inside a virtual environment.
 pip install git+https://github.com/cair/pyVNC
 pip install git+https://github.com/JDaniel41/FlashRL
 ```
