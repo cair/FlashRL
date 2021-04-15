@@ -1,40 +1,37 @@
 # FlashRL - Flash Platform for Reinforcement Learning
-**Note that FlashRL is under heavy development. Breaking changes may occur**
+**Note: This version of FlashRL has been forked to experiment with non-Keras ML frameworks**
 
-Flash Reinforcement Learning (or FlashRL) is a framework for developing RL algorithms for flash games. It features several thousand game environments, some of which are ready to use without any modification.
+For the original version of FlashRL, go to [this link](https://github.com/cair/FlashRL).
 
-If you use this work in your research, please cite the following paper :)
-```
-@article{NIK,
-	author = {Per-Arne Andersen and Morten Goodwin and Ole-Christoffer Granmo},
-	title = { FlashRL: A Reinforcement Learning Platform for Flash Games},
-	journal = {Norsk Informatikkonferanse},
-	year = {2017},
-	keywords = {},
-	issn = {1892-0721},	url = {https://ojs.bibsys.no/index.php/NIK/article/view/437}
-}
-```
+
+This repository is forked from the original FlashRL repository.
+The goal of this is to repository is to support our efforts in Clemson University's MATH 4990 Creative Inquiry class during Fall Semester 2020.
+Our goal is to use FlashRL to run our own Flash games and train reinforcement learning algorithms by using the Palmetto Cluster and NVIDIA DGX-2.
 
 # TODO List
-* State autolabeling (Feb?)
-* FPS Control
-* Docker Support
-
+* Fix pyVNC issue. Currently pyVNC fails to start a VNC server for the game to run on. We need to solve this issue in order to run our games in headless mode.
+* Begin developing custom environments.
+* Begin developing Docker containers for our code to run in. Preferably, create a Dockerfile that can be used to run custom environments without the need for the local machine to have all the dependencies installed.
 
 # Prerequisites
-* Linux based operating system (Ubuntu 17.04 and 17.10 are tested)
-* Python 3.x.x (3.5 and 3.6 are tested)
+* Ubuntu 18.04 (Our most recent testing of 20.04 proves that it does not work.)
+* Python 3.x.x (Python 3.6.8 is tested)
 * gnash
 * xvfb
 
 # Installation
-
-```python
-pip install git+https://github.com/UIA-CAIR/FlashRL
+For our testing, we have been working in a python virtual environment.
+```bash
+sudo apt-get install xvfb
+sudo apt-get install gnash
+sudo apt-get install vnc4server
+# I would reccomend doing the next steps inside a virtual environment.
+pip install git+https://github.com/cair/pyVNC
+pip install git+https://github.com/JDaniel41/FlashRL
 ```
 
 # Deploy new environment
-Setting up a new environment is a relatively simple process. We allow developers to import custom environments through ```project/contrib/environments/```
+Developers are able to import custom environments through ```project/contrib/environments/```
 
 A typical custom implementation looks like this:
 ```python
@@ -58,10 +55,10 @@ in the following section, we demonstrate how to implement the flash game Mujaffa
 * Python 3x
 * Keras
 
-### 
+###
 *  Create directory structure ```mkdir -p contrib/environments/mujaffa-v1.6```
 *  Create Configuration file:  
-```python 
+```python
 echo "define = {
     "swf": "mujaffa.swf",
     "model": "model.h5",
@@ -73,6 +70,7 @@ echo "define = {
 
 * Add swf "mujaffa.swf" to ```contrib/environments/mujaffa-v1.6/```
 * Create file ```main.py in project root``` with following template
+
 ```
 from FlashRL import Game
 
@@ -84,22 +82,6 @@ def on_frame(state, type, vnc):
 
 g = Game("mujaffa-v1.6", fps=10, frame_callback=on_frame, grayscale=True, normalized=True)
 ```
-
-The game will now run without issues and you can control the game via VNC. The game states are however not identified and must be done manually in the on_frame loop (for now)
-
-### Todos
-Document state recognition module
-
-
-
-# Tested envrionments
-```
-* Multitask
-* Multitask_2
-* 2048
-
-# GYM
-Not yet available, but soon!
 
 
 # Licence

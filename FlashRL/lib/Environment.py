@@ -2,7 +2,7 @@ import os
 import numpy as np
 from PIL import Image
 import importlib
-from keras.models import load_model
+#from keras.models import load_model
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Environment:
@@ -30,7 +30,9 @@ class Environment:
         self.state_space = self.env_config["state_space"]
 
         try:
-            self.model = load_model(self.model_path)
+            #self.model = load_model(self.model_path)
+            print("Self.model initialize would occur here")
+            self.model = None
         except OSError as e:
             print("No state prediction!")
             self.model = None
