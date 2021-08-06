@@ -1,12 +1,6 @@
 # FlashRL - Flash Platform for Reinforcement Learning
-**Note: This version of FlashRL has been forked to experiment with non-Keras ML frameworks**
 
-For the original version of FlashRL, go to [this link](https://github.com/cair/FlashRL).
-
-
-This repository is forked from the original FlashRL repository.
-The goal of this is to repository is to support our efforts in Clemson University's MATH 4990 Creative Inquiry class during Fall Semester 2020.
-Our goal is to use FlashRL to run our own Flash games and train reinforcement learning algorithms by using the Palmetto Cluster and NVIDIA DGX-2.
+For the updated version of FlashRL, go to [this link](https://github.com/cair/rl).
 
 # TODO List
 * Fix pyVNC issue. Currently pyVNC fails to start a VNC server for the game to run on. We need to solve this issue in order to run our games in headless mode.
